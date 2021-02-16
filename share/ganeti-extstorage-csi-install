@@ -1,0 +1,52 @@
+#!/bin/sh
+
+set -e
+
+: ${PROVIDER=csi}
+: ${EXTSTORAGE=/usr/share/ganeti/extstorage}
+
+LIBDIR=@LIBDIR@
+
+PROVIDERDIR=${EXTSTORAGE}/${PROVIDER}
+
+if [ -d "${PROVIDERDIR}" ]; then
+    echo "It seems that external provider ${PROVIDER} already exists in ${PROVIDERDIR}"
+    exit 1
+fi
+
+mkdir -p ${PROVIDERDIR}
+
+cat > ${PROVIDERDIR}/wrapper <<EOF
+#!/bin/sh
+
+# load environment
+. ${PROVIDERDIR}/env
+
+export OPERATION="\$(basename "\$0")"
+
+exec ${LIBDIR}/ganeti-extstorage-csi
+EOF
+touch ${PROVIDERDIR}/parameters.list
+
+cat > ${PROVIDERDIR}/env <<EOF
+# Sample environment file for ganeti-extstorage-csi
+# These are defaults
+#CSI_ENDPOINT=unix:///csi/csi.sock
+
+# Default config uses etcd at http://localhost:2379 for metadata store.
+# An etcd cluster needs to be set up on all nodes beforehand
+#ETCD_STORE_ENDPOINT=http://localhost:2379
+
+# For development, you may set a file-based storage.
+# Enabling it disables the etcd store. This is really just for development.
+#FILE_STORE_BASE=/var/lib/ganeti-extstorage-csi/${PROVIDER}
+EOF
+
+chmod 755 ${PROVIDERDIR}/wrapper
+
+for cmd in attach create detach grow remove setinfo verify ; do
+    ln -s wrapper ${PROVIDERDIR}/${cmd}
+done
+
+echo "+ Ganeti-extstorage provider has been installed, name=${PROVIDER}, dir=${PROVIDERDIR}"
+echo "+ Dont forget to edit ${PROVIDERDIR}/parameters.list"
