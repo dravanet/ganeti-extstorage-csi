@@ -22,6 +22,26 @@ func (c *client) Attach(ctx context.Context, cfg *extstorage.VolumeInfo) error {
 
 	node := csi.NewNodeClient(c.conn)
 
+	var pubresp *csi.ControllerPublishVolumeResponse
+
+	if c.controllerPublish {
+		ni, err := node.NodeGetInfo(ctx, &csi.NodeGetInfoRequest{})
+		if err != nil {
+			return err
+		}
+
+		controller := csi.NewControllerClient(c.conn)
+		pubresp, err = controller.ControllerPublishVolume(ctx, &csi.ControllerPublishVolumeRequest{
+			VolumeId:         vol.VolumeId,
+			NodeId:           ni.GetNodeId(),
+			VolumeCapability: volumeCapability,
+			VolumeContext:    vol.VolumeContext,
+		})
+		if err != nil {
+			return err
+		}
+	}
+
 	nodeCaps, err := node.NodeGetCapabilities(ctx, &csi.NodeGetCapabilitiesRequest{})
 	if err != nil {
 		return err
@@ -44,6 +64,7 @@ func (c *client) Attach(ctx context.Context, cfg *extstorage.VolumeInfo) error {
 
 		_, err = node.NodeStageVolume(ctx, &csi.NodeStageVolumeRequest{
 			VolumeId:          vol.VolumeId,
+			PublishContext:    pubresp.GetPublishContext(),
 			VolumeContext:     vol.VolumeContext,
 			StagingTargetPath: stagingTargetPath,
 			VolumeCapability:  volumeCapability,
@@ -57,10 +78,11 @@ func (c *client) Attach(ctx context.Context, cfg *extstorage.VolumeInfo) error {
 	targetPath := devicePath(cfg)
 	_, err = node.NodePublishVolume(ctx, &csi.NodePublishVolumeRequest{
 		VolumeId:          vol.VolumeId,
-		VolumeContext:     vol.VolumeContext,
+		PublishContext:    pubresp.GetPublishContext(),
 		StagingTargetPath: stagingTargetPath,
 		TargetPath:        targetPath,
 		VolumeCapability:  volumeCapability,
+		VolumeContext:     vol.VolumeContext,
 	})
 	if err != nil {
 		return err

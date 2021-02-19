@@ -35,5 +35,4 @@ For testing/development purposes, a simple file based metadata storage is availa
 
 To be fully CSI compliant:
 
-- Invoke all controller operations if advertised (e.g. ControllerPublish*)
 - Invoke all node operations if advertiset (e.g. NodeExpandVolume)

@@ -81,10 +81,25 @@ func New(endpoint string, store store.Store) (iface extstorage.Interface, err er
 		return
 	}
 
-	return &client{
+	controller := csi.NewControllerClient(conn)
+	controllerCaps, err := controller.ControllerGetCapabilities(ctx, &csi.ControllerGetCapabilitiesRequest{})
+	if err != nil {
+		return
+	}
+
+	cl := &client{
 		conn:  conn,
 		store: store,
-	}, nil
+	}
+
+	for _, cap := range controllerCaps.Capabilities {
+		switch cap.GetRpc().GetType() {
+		case csi.ControllerServiceCapability_RPC_PUBLISH_UNPUBLISH_VOLUME:
+			cl.controllerPublish = true
+		}
+	}
+
+	return cl, nil
 }
 
 func (c *client) Close(ctx context.Context) error {
@@ -94,6 +109,8 @@ func (c *client) Close(ctx context.Context) error {
 type client struct {
 	conn  *grpc.ClientConn
 	store store.Store
+
+	controllerPublish bool
 }
 
 // CSIVolumePath returns the target path for a volume

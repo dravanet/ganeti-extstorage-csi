@@ -57,5 +57,21 @@ func (c *client) Detach(ctx context.Context, cfg *extstorage.VolumeInfo) error {
 
 	os.Remove(volumePath(cfg))
 
+	if c.controllerPublish {
+		ni, err := node.NodeGetInfo(ctx, &csi.NodeGetInfoRequest{})
+		if err != nil {
+			return err
+		}
+
+		controller := csi.NewControllerClient(c.conn)
+		_, err = controller.ControllerUnpublishVolume(ctx, &csi.ControllerUnpublishVolumeRequest{
+			VolumeId: vol.VolumeId,
+			NodeId:   ni.GetNodeId(),
+		})
+		if err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
