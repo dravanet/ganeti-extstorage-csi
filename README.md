@@ -33,6 +33,8 @@ For testing/development purposes, a simple file based metadata storage is availa
 
 ## TODO
 
-To be fully CSI compliant:
+* Make all operations as idempotent as possible.
 
-- Invoke all node operations if advertiset (e.g. NodeExpandVolume)
+## Usage
+
+TBD
