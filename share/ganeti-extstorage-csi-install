@@ -29,17 +29,18 @@ EOF
 touch ${PROVIDERDIR}/parameters.list
 
 cat > ${PROVIDERDIR}/env <<EOF
+## -- shell fragment --
 # Sample environment file for ganeti-extstorage-csi
 # These are defaults
-#CSI_ENDPOINT=unix:///csi/csi.sock
+#export CSI_ENDPOINT=unix:///csi/csi.sock
 
 # Default config uses etcd at http://localhost:2379 for metadata store.
 # An etcd cluster needs to be set up on all nodes beforehand
-#ETCD_STORE_ENDPOINT=http://localhost:2379
+#export ETCD_STORE_ENDPOINT=http://localhost:2379
 
 # For development, you may set a file-based storage.
 # Enabling it disables the etcd store. This is really just for development.
-#FILE_STORE_BASE=/var/lib/ganeti-extstorage-csi/${PROVIDER}
+#export FILE_STORE_BASE=/var/lib/ganeti-extstorage-csi/${PROVIDER}
 EOF
 
 chmod 755 ${PROVIDERDIR}/wrapper
