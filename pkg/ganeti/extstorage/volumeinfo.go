@@ -23,7 +23,7 @@ type VolumeInfo struct {
 	// The human-readable name of the Disk config object (optional).
 	Cname string `env:"VOL_CNAME"`
 	// The uuid of the Disk config object.
-	UUID string `env:"VOL_UUID"`
+	UUID string `env:"VOL_UUID" required:"true"`
 	// The name of the volume’s snapshot.
 	SnapshotName string `env:"VOL_SNAPSHOT_NAME"`
 	// The size of the volume’s snapshot.

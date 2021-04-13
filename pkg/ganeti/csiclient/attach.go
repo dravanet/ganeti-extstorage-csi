@@ -11,7 +11,7 @@ import (
 )
 
 func (c *client) Attach(ctx context.Context, cfg *extstorage.VolumeInfo) error {
-	vol, err := c.store.Get(ctx, cfg.Name)
+	vol, err := c.store.Get(ctx, cfg.UUID)
 	if err != nil {
 		return err
 	}

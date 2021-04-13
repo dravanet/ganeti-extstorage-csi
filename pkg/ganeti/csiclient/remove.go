@@ -8,7 +8,7 @@ import (
 )
 
 func (c *client) Remove(ctx context.Context, cfg *extstorage.VolumeInfo) error {
-	vol, err := c.store.Get(ctx, cfg.Name)
+	vol, err := c.store.Get(ctx, cfg.UUID)
 	if err != nil {
 		return err
 	}
@@ -27,5 +27,5 @@ func (c *client) Remove(ctx context.Context, cfg *extstorage.VolumeInfo) error {
 		return err
 	}
 
-	return c.store.Remove(ctx, cfg.Name)
+	return c.store.Remove(ctx, cfg.UUID)
 }

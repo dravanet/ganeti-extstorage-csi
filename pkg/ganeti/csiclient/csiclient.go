@@ -115,7 +115,7 @@ type client struct {
 
 // CSIVolumePath returns the target path for a volume
 func volumePath(vol *extstorage.VolumeInfo) string {
-	return path.Join(csiStoragePath, vol.Name)
+	return path.Join(csiStoragePath, vol.UUID)
 }
 
 func devicePath(vol *extstorage.VolumeInfo) string {

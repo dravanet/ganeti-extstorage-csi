@@ -10,7 +10,7 @@ import (
 const mebibytes = 1 << 20
 
 func (c *client) Create(ctx context.Context, cfg *extstorage.VolumeInfo) error {
-	vol, err := c.store.Get(ctx, cfg.Name)
+	vol, err := c.store.Get(ctx, cfg.UUID)
 	if err != nil {
 		return err
 	}
@@ -22,7 +22,7 @@ func (c *client) Create(ctx context.Context, cfg *extstorage.VolumeInfo) error {
 	cont := csi.NewControllerClient(c.conn)
 
 	resp, err := cont.CreateVolume(ctx, &csi.CreateVolumeRequest{
-		Name: cfg.Name,
+		Name: cfg.UUID,
 		CapacityRange: &csi.CapacityRange{
 			RequiredBytes: cfg.Size * mebibytes,
 			LimitBytes:    cfg.Size * mebibytes,
@@ -33,5 +33,5 @@ func (c *client) Create(ctx context.Context, cfg *extstorage.VolumeInfo) error {
 		return err
 	}
 
-	return c.store.Add(ctx, cfg.Name, resp.Volume)
+	return c.store.Add(ctx, cfg.UUID, resp.Volume)
 }

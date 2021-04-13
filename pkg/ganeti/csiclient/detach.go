@@ -9,7 +9,7 @@ import (
 )
 
 func (c *client) Detach(ctx context.Context, cfg *extstorage.VolumeInfo) error {
-	vol, err := c.store.Get(ctx, cfg.Name)
+	vol, err := c.store.Get(ctx, cfg.UUID)
 	if err != nil {
 		return err
 	}
