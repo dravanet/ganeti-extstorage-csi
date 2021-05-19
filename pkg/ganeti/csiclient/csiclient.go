@@ -2,6 +2,7 @@ package csiclient
 
 import (
 	"context"
+	"crypto/tls"
 	"errors"
 	"fmt"
 	"os"
@@ -9,6 +10,7 @@ import (
 	"time"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 
 	"github.com/dravanet/ganeti-extstorage-csi/pkg/csi"
 	"github.com/dravanet/ganeti-extstorage-csi/pkg/ganeti/extstorage"
@@ -33,11 +35,18 @@ var volumeCapability = &csi.VolumeCapability{
 }
 
 // New returns a new ganeti-extstorage interface talkint to CSI
-func New(endpoint string, store store.Store) (iface extstorage.Interface, err error) {
+func New(endpoint string, tlsConfig *tls.Config, store store.Store) (iface extstorage.Interface, err error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 
-	conn, err := grpc.DialContext(ctx, endpoint, grpc.WithInsecure())
+	var opts grpc.DialOption
+	if tlsConfig != nil {
+		opts = grpc.WithTransportCredentials(credentials.NewTLS(tlsConfig))
+	} else {
+		opts = grpc.WithInsecure()
+	}
+
+	conn, err := grpc.DialContext(ctx, endpoint, opts)
 	if err != nil {
 		return
 	}

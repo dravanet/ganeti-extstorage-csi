@@ -2,8 +2,11 @@ package main
 
 import (
 	"context"
+	"crypto/tls"
+	"crypto/x509"
 	"errors"
 	"log"
+	"os"
 	"time"
 
 	"github.com/namsral/flag"
@@ -21,6 +24,9 @@ var (
 	operation         = flag.String("operation", "", "Operation to perform: create|attach|detach|remove|grow|setinfo|verify")
 	etcdStoreEndpoint = flag.String("etcd-store-endpoint", "http://localhost:2379", "Etcd endpoint for etcd store")
 	fileStoreBase     = flag.String("file-store-base", "", "File store base directory, for development")
+	tlsCert           = flag.String("tls-cert", "", "TLS Client Certificate")
+	tlsKey            = flag.String("tls-key", "", "TLS Client Private key")
+	tlsCA             = flag.String("tls-ca", "", "TLS Certificate Authority")
 )
 
 func main() {
@@ -28,6 +34,7 @@ func main() {
 	defer cancel()
 	var st store.Store
 	var err error
+	var tlsConfig *tls.Config
 
 	flag.Parse()
 
@@ -41,9 +48,43 @@ func main() {
 	}
 	defer st.Close(ctx)
 
+	if *tlsCert != "" && *tlsKey != "" {
+		tlsConfig = &tls.Config{}
+
+		cert, err := tls.LoadX509KeyPair(*tlsCert, *tlsKey)
+		if err != nil {
+			log.Fatal(err)
+		}
+		tlsConfig.Certificates = []tls.Certificate{cert}
+
+		if *tlsCA != "" {
+			roots := x509.NewCertPool()
+			cacerts, err := os.ReadFile(*tlsCA)
+			if err != nil {
+				log.Fatal(err)
+			}
+			roots.AppendCertsFromPEM(cacerts)
+
+			// Perform server validation, only check CA trust model
+			tlsConfig.InsecureSkipVerify = true
+			tlsConfig.VerifyConnection = func(cs tls.ConnectionState) error {
+				opts := x509.VerifyOptions{
+					Intermediates: x509.NewCertPool(),
+					Roots:         roots,
+					KeyUsages:     []x509.ExtKeyUsage{x509.ExtKeyUsageAny},
+				}
+				for _, cert := range cs.PeerCertificates[1:] {
+					opts.Intermediates.AddCert(cert)
+				}
+				_, err := cs.PeerCertificates[0].Verify(opts)
+				return err
+			}
+		}
+	}
+
 	volConfig := extstorage.ParseVolumeInfo()
 
-	client, err := csiclient.New(*csiEndpoint, st)
+	client, err := csiclient.New(*csiEndpoint, tlsConfig, st)
 	if err != nil {
 		log.Fatal(err)
 	}
