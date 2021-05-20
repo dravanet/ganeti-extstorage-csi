@@ -10,6 +10,10 @@ import (
 const mebibytes = 1 << 20
 
 func (c *client) Create(ctx context.Context, cfg *extstorage.VolumeInfo) error {
+	if !c.controllerService {
+		return ErrControllerServiceMissing
+	}
+
 	vol, err := c.store.Get(ctx, cfg.UUID)
 	if err != nil {
 		return err

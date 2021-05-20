@@ -23,8 +23,9 @@ const (
 
 // Common errors
 var (
-	ErrVolumeNotFound = errors.New("Volume not found in store")
-	ErrVolumeExists   = errors.New("Volume already exists")
+	ErrVolumeNotFound           = errors.New("Volume not found in store")
+	ErrVolumeExists             = errors.New("Volume already exists")
+	ErrControllerServiceMissing = errors.New("Controller service missing")
 )
 
 var volumeCapability = &csi.VolumeCapability{
@@ -69,10 +70,18 @@ func New(endpoint string, tlsConfig *tls.Config, store store.Store) (iface extst
 		return
 	}
 
+	cl := &client{
+		conn:  conn,
+		store: store,
+	}
+
 	var volexpansion bool
 
 	for _, cap := range caps.Capabilities {
 		if serv := cap.GetService(); serv != nil {
+			if serv.GetType() == csi.PluginCapability_Service_CONTROLLER_SERVICE {
+				cl.controllerService = true
+			}
 			if serv.GetType() == csi.PluginCapability_Service_VOLUME_ACCESSIBILITY_CONSTRAINTS {
 				err = errors.New("CSI reported VOLUME_ACCESSIBILITY_CONSTRAINTS capability, which is not supported")
 				return
@@ -90,21 +99,20 @@ func New(endpoint string, tlsConfig *tls.Config, store store.Store) (iface extst
 		return
 	}
 
-	controller := csi.NewControllerClient(conn)
-	controllerCaps, err := controller.ControllerGetCapabilities(ctx, &csi.ControllerGetCapabilitiesRequest{})
-	if err != nil {
-		return
-	}
+	if cl.controllerService {
+		var controllerCaps *csi.ControllerGetCapabilitiesResponse
 
-	cl := &client{
-		conn:  conn,
-		store: store,
-	}
+		controller := csi.NewControllerClient(conn)
+		controllerCaps, err = controller.ControllerGetCapabilities(ctx, &csi.ControllerGetCapabilitiesRequest{})
+		if err != nil {
+			return
+		}
 
-	for _, cap := range controllerCaps.Capabilities {
-		switch cap.GetRpc().GetType() {
-		case csi.ControllerServiceCapability_RPC_PUBLISH_UNPUBLISH_VOLUME:
-			cl.controllerPublish = true
+		for _, cap := range controllerCaps.Capabilities {
+			switch cap.GetRpc().GetType() {
+			case csi.ControllerServiceCapability_RPC_PUBLISH_UNPUBLISH_VOLUME:
+				cl.controllerPublish = true
+			}
 		}
 	}
 
@@ -119,6 +127,7 @@ type client struct {
 	conn  *grpc.ClientConn
 	store store.Store
 
+	controllerService bool
 	controllerPublish bool
 }
 
