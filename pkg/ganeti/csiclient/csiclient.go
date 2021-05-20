@@ -23,9 +23,9 @@ const (
 
 // Common errors
 var (
-	ErrVolumeNotFound           = errors.New("Volume not found in store")
-	ErrVolumeExists             = errors.New("Volume already exists")
-	ErrControllerServiceMissing = errors.New("Controller service missing")
+	ErrVolumeNotFound           = errors.New("volume not found in store")
+	ErrVolumeExists             = errors.New("volume already exists")
+	ErrControllerServiceMissing = errors.New("controller service missing")
 )
 
 var volumeCapability = &csi.VolumeCapability{
