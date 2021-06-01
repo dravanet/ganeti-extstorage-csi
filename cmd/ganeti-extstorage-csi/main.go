@@ -21,12 +21,12 @@ import (
 var (
 	// CSI variables
 	csiEndpoint       = flag.String("csi-endpoint", "unix:///csi/csi.sock", "CSI endpoint to connect to")
+	csiTlsCert        = flag.String("csi-tls-cert", "", "CSI TLS Client Certificate")
+	csiTlsKey         = flag.String("csi-tls-key", "", "CSI TLS Client Private key")
+	csiTlsCA          = flag.String("csi-tls-ca", "", "CSI TLS Certificate Authority")
 	operation         = flag.String("operation", "", "Operation to perform: create|attach|detach|remove|grow|setinfo|verify")
 	etcdStoreEndpoint = flag.String("etcd-store-endpoint", "http://localhost:2379", "Etcd endpoint for etcd store")
 	fileStoreBase     = flag.String("file-store-base", "", "File store base directory, for development")
-	tlsCert           = flag.String("tls-cert", "", "TLS Client Certificate")
-	tlsKey            = flag.String("tls-key", "", "TLS Client Private key")
-	tlsCA             = flag.String("tls-ca", "", "TLS Certificate Authority")
 )
 
 func main() {
@@ -48,18 +48,18 @@ func main() {
 	}
 	defer st.Close(ctx)
 
-	if *tlsCert != "" && *tlsKey != "" {
+	if *csiTlsCert != "" && *csiTlsKey != "" {
 		tlsConfig = &tls.Config{}
 
-		cert, err := tls.LoadX509KeyPair(*tlsCert, *tlsKey)
+		cert, err := tls.LoadX509KeyPair(*csiTlsCert, *csiTlsKey)
 		if err != nil {
 			log.Fatal(err)
 		}
 		tlsConfig.Certificates = []tls.Certificate{cert}
 
-		if *tlsCA != "" {
+		if *csiTlsCA != "" {
 			roots := x509.NewCertPool()
-			cacerts, err := os.ReadFile(*tlsCA)
+			cacerts, err := os.ReadFile(*csiTlsCA)
 			if err != nil {
 				log.Fatal(err)
 			}

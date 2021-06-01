@@ -35,6 +35,13 @@ cat > ${PROVIDERDIR}/env <<EOF
 #export CSI_ENDPOINT=unix:///csi/csi.sock
 #export CSI_ENDPOINT=127.0.0.1:5001
 
+# CSI TLS parameters. CSI_TLS_CERT and CSI_TLS_KEY are mandatory for TLS.
+# If CSI_TLS_CA is given, the server is required to present a valid certificate
+# against the CA. This is HIGHLY RECOMMENDED.
+#export CSI_TLS_CERT=/path/to/cert.pem
+#export CSI_TLS_KEY=/path/to/key.pem
+#export CSI_TLS_CA=/path/to/ca.pem
+
 # Default config uses etcd at http://localhost:2379 for metadata store.
 # An etcd cluster needs to be set up on all nodes beforehand
 #export ETCD_STORE_ENDPOINT=http://localhost:2379
@@ -43,11 +50,6 @@ cat > ${PROVIDERDIR}/env <<EOF
 # Enabling it disables the etcd store. This is really just for development.
 #export FILE_STORE_BASE=/var/lib/ganeti-extstorage-csi/${PROVIDER}
 
-# TLS parameters. TLS_CERT and TLS_KEY are mandatory for TLS. If TLS_CA is given, the client
-# is required to present a certificate and be valid against the CA. This is HIGHLY RECOMMENDED.
-#export TLS_CERT=/path/to/cert.pem
-#export TLS_KEY=/path/to/key.pem
-#export TLS_CA=/path/to/ca.pem
 EOF
 
 chmod 755 ${PROVIDERDIR}/wrapper
