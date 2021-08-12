@@ -3,13 +3,14 @@ package etcd
 
 import (
 	"context"
+	"crypto/tls"
 	"encoding/json"
 	"errors"
 	"fmt"
-	"strings"
 
 	v3 "go.etcd.io/etcd/api/v3/etcdserverpb"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 
 	"github.com/dravanet/ganeti-extstorage-csi/pkg/csi"
 	"github.com/dravanet/ganeti-extstorage-csi/pkg/store"
@@ -20,17 +21,15 @@ const (
 )
 
 // New returns an etcd based Store
-func New(endpoint string) (store.Store, error) {
-	var options []grpc.DialOption
-	switch {
-	case strings.HasPrefix(endpoint, "http://"):
-		endpoint = strings.TrimPrefix(endpoint, "http://")
-		options = append(options, grpc.WithInsecure())
-	case strings.HasPrefix(endpoint, "https://"):
-		endpoint = strings.TrimPrefix(endpoint, "https://")
+func New(endpoint string, tlsConfig *tls.Config) (store.Store, error) {
+	var opts grpc.DialOption
+	if tlsConfig != nil {
+		opts = grpc.WithTransportCredentials(credentials.NewTLS(tlsConfig))
+	} else {
+		opts = grpc.WithInsecure()
 	}
 
-	conn, err := grpc.Dial(endpoint, options...)
+	conn, err := grpc.Dial(endpoint, opts)
 	if err != nil {
 		return nil, err
 	}

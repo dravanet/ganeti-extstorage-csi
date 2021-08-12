@@ -42,9 +42,16 @@ cat > ${PROVIDERDIR}/env <<EOF
 #export CSI_TLS_KEY=/path/to/key.pem
 #export CSI_TLS_CA=/path/to/ca.pem
 
-# Default config uses etcd at http://localhost:2379 for metadata store.
+# Default config uses etcd at localhost:2379 for metadata store.
 # An etcd cluster needs to be set up on all nodes beforehand
-#export ETCD_STORE_ENDPOINT=http://localhost:2379
+#export ETCD_STORE_ENDPOINT=localhost:2379
+
+# Etcd TLS parameters. ETCD_TLS_CERT and ETCD_TLS_KEY are mandatory for TLS.
+# If ETCD_TLS_CA is given, the server is required to present a valid certificate
+# against the CA. This is HIGHLY RECOMMENDED.
+#export ETCD_TLS_CERT=/path/to/cert.pem
+#export ETCD_TLS_KEY=/path/to/key.pem
+#export ETCD_TLS_CA=/path/to/ca.pem
 
 # For development, you may set a file-based storage.
 # Enabling it disables the etcd store. This is really just for development.
