@@ -1,0 +1,11 @@
+Source: ganeti-extstorage-csi
+Section: net
+Priority: optional
+Maintainer: Richard Kojedzinszky <richard@kojedz.in>
+Build-Depends: debhelper (>= 11)
+Standards-Version: 4.1.3
+
+Package: ganeti-extstorage-csi
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Ganeti support for CSI through external storage interface
