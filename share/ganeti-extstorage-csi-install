@@ -8,19 +8,21 @@ set -e
 LIBDIR=@LIBDIR@
 
 PROVIDERDIR=${EXTSTORAGE}/${PROVIDER}
+CONFDIR=/etc/ganeti-extstorage-csi
+ENVFILE="${CONFDIR}/${PROVIDER}.env"
 
 if [ -d "${PROVIDERDIR}" ]; then
     echo "It seems that external provider ${PROVIDER} already exists in ${PROVIDERDIR}"
     exit 1
 fi
 
-mkdir -p ${PROVIDERDIR}
+mkdir -p ${PROVIDERDIR} ${CONFDIR}
 
 cat > ${PROVIDERDIR}/wrapper <<EOF
 #!/bin/sh
 
 # load environment
-. ${PROVIDERDIR}/env
+. ${ENVFILE}
 
 export OPERATION="\$(basename "\$0")"
 
@@ -28,7 +30,8 @@ exec ${LIBDIR}/ganeti-extstorage-csi
 EOF
 touch ${PROVIDERDIR}/parameters.list
 
-cat > ${PROVIDERDIR}/env <<EOF
+if ! [ -f "${ENVFILE}" ]; then
+	cat > "${ENVFILE}" <<EOF
 ## -- shell fragment --
 # Sample environment file for ganeti-extstorage-csi
 # These are defaults
@@ -58,6 +61,7 @@ cat > ${PROVIDERDIR}/env <<EOF
 #export FILE_STORE_BASE=/var/lib/ganeti-extstorage-csi/${PROVIDER}
 
 EOF
+fi
 
 chmod 755 ${PROVIDERDIR}/wrapper
 

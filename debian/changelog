@@ -1,3 +1,9 @@
+ganeti-extstorage-csi (0.1.1) stable; urgency=medium
+
+  * Place environment file under /etc
+
+ -- Richard Kojedzinszky <richard.kojedzinszky@euronetrt.hu>  Mon, 16 Aug 2021 14:19:09 +0200
+
 ganeti-extstorage-csi (0.1.0) stable; urgency=medium
 
   * Release 0.1.0
