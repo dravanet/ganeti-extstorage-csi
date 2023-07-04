@@ -1,3 +1,9 @@
+ganeti-extstorage-csi (0.1.2) stable; urgency=medium
+
+  * Update dependencies and Go module to 1.20
+
+ -- Richard Kojedzinszky <richard.kojedzinszky@euronetrt.hu>  Tue, 04 Jul 2023 14:31:22 +0200
+
 ganeti-extstorage-csi (0.1.1) stable; urgency=medium
 
   * Place environment file under /etc
