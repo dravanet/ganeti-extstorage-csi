@@ -28,7 +28,11 @@ export OPERATION="\$(basename "\$0")"
 
 exec ${LIBDIR}/ganeti-extstorage-csi
 EOF
-touch ${PROVIDERDIR}/parameters.list
+
+cat > ${PROVIDERDIR}/parameters.list <<EOF
+truenas_csi_nas Truenas CSI NAS selector. Optional. If not given, the default NAS will be used.
+truenas_csi_config Truenas CSI config selector. Optional. If not given, the default config will be used.
+EOF
 
 if ! [ -f "${ENVFILE}" ]; then
 	cat > "${ENVFILE}" <<EOF

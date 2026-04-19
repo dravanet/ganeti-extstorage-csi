@@ -30,6 +30,10 @@ type VolumeInfo struct {
 	SnapshotSize int64 `env:"VOL_SNAPSHOT_SIZE"`
 	// Whether the volume will be opened for exclusive access or not. This will be False (denoting shared access) during migration.
 	OpenExclusive bool `env:"VOL_OPEN_EXCLUSIVE"`
+	// Truenas CSI NAS selector
+	TrueNASCSINasSelector string `env:"EXTP_TRUENAS_CSI_NAS"`
+	// Truenas-CSI config selector
+	TrueNASCSIConfigSelector string `env:"EXTP_TRUENAS_CSI_CONFIG"`
 }
 
 // ParseVolumeInfo returns VolumeInfo parsed from environment

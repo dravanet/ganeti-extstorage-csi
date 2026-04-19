@@ -2,8 +2,6 @@
 
 Ganeti support for CSI through external storage interface.
 
-WARNING: This software is still in development, some csi requirements are still missing, so it it not production ready.
-
 ## Architecture
 
 ```ascii
@@ -35,6 +33,29 @@ For testing/development purposes, a simple file based metadata storage is availa
 
 * Make all operations as idempotent as possible.
 
+## Install
+
+Running simply `ganeti-extstorage-csi-install` will install the extstorage provider named `csi`. If you want a different name, pass it via environment variable `PROVIDER` when running the install script. This will actually populate folder `/usr/lib/ganeti-extstorage-csi/$PROVIDER` and configuration file `/etc/ganeti-extstorage-csi/$PROVIDER.env`. Edit the latter to setup CSI endpoint, metadata storage.
+
 ## Usage
 
-TBD
+When set up correctly, creating a ganeti instance with disk provided by this driver is simple, just run
+
+```bash
+# gnt-instance add -t ext --disk 0:size=10G,provider=<provider> ...
+```
+
+Set `<provider>` to the provider name (`csi` by default).
+
+### TrueNAS-CSI settings
+
+A TrueNAS csi driver can handle multiple NAS and each NAS may have multiple configurations, see https://github.com/dravanet/truenas-csi/tree/master/examples. ganeti-extstorage-csi has support for selecting the desired configuration. These are available as extstorage parameters:
+
+- truenas_csi_nas
+- truenas_csi_config
+
+They are optional, and can be passed as options:
+
+```bash
+# gnt-instance add -t ext --disk 0:size=10G,provider=<provider>,truenas_csi_nas=xxx,truenas_csi_config=yyy ...
+```
